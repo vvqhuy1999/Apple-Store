@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Sản Phẩm</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Your existing styles remain unchanged */
+        .container { margin-top: 50px; max-width: 1200px; padding: 20px; }
+        .product-header { font-size: 2rem; font-weight: bold; color: #333; margin-bottom: 30px; text-align: center; }
+        .product-image { max-width: 100%; height: auto; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); transition: transform 0.3s ease; }
+        .product-image:hover { transform: scale(1.02); }
+        .thumbnail-images { display: flex; flex-wrap: nowrap; overflow-x: auto; margin-top: 20px; padding: 10px; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); }
+        .thumbnail-image { flex: 0 0 auto; width: 100px; height: 100px; margin-right: 15px; object-fit: cover; cursor: pointer; border: 3px solid #ddd; border-radius: 8px; transition: border-color 0.3s ease, transform 0.3s ease; }
+        .thumbnail-image.selected { border-color: #0d6efd; border-width: 4px; transform: scale(1.05); }
+        .thumbnail-image:hover { border-color: #0a58ca; transform: scale(1.05); }
+        .options-section { margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); }
+        .color-option { display: inline-block; width: 40px; height: 40px; margin: 5px; border: 3px solid #ccc; cursor: pointer; border-radius: 50%; transition: border-color 0.3s ease, transform 0.3s ease; }
+        .color-option.selected { border-color: #0d6efd; transform: scale(1.1); }
+        .color-option.disabled { opacity: 0.5; cursor: not-allowed; }
+        .color-option:hover { border-color: #0a58ca; transform: scale(1.1); }
+        .capacity-option { display: inline-block; padding: 8px 15px; margin: 5px; border: 2px solid #0d6efd; cursor: pointer; border-radius: 5px; background-color: #f8f9fa; font-weight: 500; transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease; }
+        .capacity-option.selected { background-color: #0d6efd; color: white; border-color: #0a58ca; transform: scale(1.05); }
+        .capacity-option.disabled { opacity: 0.5; cursor: not-allowed; }
+        .capacity-option:hover { background-color: #0a58ca; border-color: #084298; transform: scale(1.05); }
+        .price-section { margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); }
+        .price { color: #dc3545; font-weight: bold; font-size: 1.5rem; margin-right: 10px; }
+        .quantity-controls { display: flex; align-items: center; margin-top: 10px; }
+        .quantity-btn { padding: 8px 12px; font-size: 1rem; border: 2px solid #0d6efd; background-color: #fff; cursor: pointer; border-radius: 5px; transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease; }
+        .quantity-btn:hover { background-color: #0d6efd; color: white; border-color: #0a58ca; transform: scale(1.05); }
+        .quantity-btn.disabled { opacity: 0.5; cursor: not-allowed; }
+        #quantityInput { width: 80px; padding: 8px; margin: 0 10px; text-align: center; border: 2px solid #0d6efd; border-radius: 5px; font-size: 1rem; }
+        .btn-primary { background-color: #0d6efd; border-color: #0d6efd; padding: 12px 25px; font-size: 1.1rem; margin-top: 20px; transition: background-color 0.3s ease, transform 0.3s ease; }
+        .btn-primary:hover { background-color: #0a58ca; border-color: #0a58ca; transform: scale(1.05); }
+        .navbar { background-color: #0d6efd; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+        .navbar-brand, .nav-link { color: white !important; font-weight: 500; }
+        .navbar-brand:hover, .nav-link:hover { color: #f8f9fa !important; text-decoration: underline; }
+        h4 { margin-top: 25px; font-size: 1.3rem; color: #333; font-weight: bold; }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light">
+    <a class="navbar-brand" th:href="@{/items/index}">Trang Chủ</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item"><a class="nav-link" th:href="@{/account/login}">Đăng Nhập</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/cart/view}">Giỏ Hàng</a></li>
+            <li class="nav-item"><a class="nav-link" th:href="@{/items/index}">Danh Sách Mặt Hàng</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <h2 class="product-header">Chi Tiết Sản Phẩm</h2>
+    <div th:if="${product != null}" class="row">
+        <div class="col-md-6">
+            <img id="mainProductImage"
+                 th:src="${hinhAnhs != null and hinhAnhs.size() > 0 ? hinhAnhs[0].linkhinhanh : 'https://via.placeholder.com/300x200?text=No+Image'}"
+                 class="product-image mb-4" alt="Product Image">
+            <h4>Hình ảnh khác</h4>
+            <div class="thumbnail-images" th:if="${hinhAnhs != null and hinhAnhs.size() > 0}">
+                <img th:each="hinhAnh : ${hinhAnhs}"
+                     th:src="${hinhAnh.linkhinhanh}"
+                     th:data-link="${hinhAnh.linkhinhanh}"
+                     th:data-mamausac="${hinhAnh.mausacs?.mamausac}"
+                     class="thumbnail-image">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <h3 th:text="${product.tensanpham}" class="mb-4" style="font-size: 1.8rem; color: #0d6efd;"></h3>
+            <p th:text="${product.mota}">Mô tả: </p>
+            <div class="options-section">
+                <h4>Chọn màu sắc</h4>
+                <div id="colorOptions" class="d-flex flex-wrap">
+                    <div th:each="mauSac : ${mauSacs}"
+                         class="color-option"
+                         th:style="'background-color: ' + ${mauSac.englishname} + ';'"
+                         th:data-mamausac="${mauSac.mamausac}"></div>
+                </div>
+            </div>
+            <div class="options-section">
+                <h4>Chọn dung lượng</h4>
+                <div id="capacityOptions" class="d-flex flex-wrap">
+                    <div th:each="dungLuong, stat : ${dungLuongs}"
+                         class="capacity-option"
+                         th:text="${dungLuong.sodungluong + ' ' + dungLuong.donvi}"
+                         th:data-madungluong="${dungLuong.madungluong}"
+                         th:data-index="${stat.index}"
+                         th:data-gia="${giaFormatted[stat.index]}"></div>
+                </div>
+            </div>
+            <div class="price-section">
+                <h4>Giá và Số lượng</h4>
+                <div class="d-flex align-items-center">
+                    <span class="price" id="productPrice"
+                          th:text="${giaFormatted != null and giaFormatted.size() > 0 ? giaFormatted[0] + ' VNĐ' : 'Liên hệ'}"></span>
+                </div>
+                <form th:action="@{/cart/add}" method="post" class="mt-4">
+                    <input type="hidden" name="productId" th:value="${product.masanpham}">
+                    <input type="hidden" name="maMauSac" id="selectedColor">
+                    <input type="hidden" name="maDungLuong" id="selectedCapacity">
+                    <input type="hidden" name="imageUrl" id="selectedImageUrl"> <!-- Thêm trường cho hình ảnh -->
+                    <input type="hidden" name="price" id="selectedPrice"> <!-- Thêm trường cho giá -->
+                    <div class="quantity-controls">
+                        <button type="button" class="quantity-btn" id="decreaseQty">-</button>
+                        <input type="number" name="quantity" id="quantityInput" value="1" min="1" max="10" class="form-control">
+                        <button type="button" class="quantity-btn" id="increaseQty">+</button>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block mt-3">
+                        <i class="fas fa-cart-plus"></i> Thêm vào giỏ
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div th:if="${product == null}" class="text-center">
+        <p th:text="${error}" class="alert alert-danger mt-4" style="font-size: 1.2rem;"></p>
+    </div>
+</div>
+
+<!-- Inject mauSacHinhAnhMap into JavaScript -->
+<script th:inline="javascript">
+    window.mauSacHinhAnhMap = /*[[${mauSacHinhAnhMap}]]*/ {};
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Log to verify data
+        console.log('mauSacHinhAnhMap:', window.mauSacHinhAnhMap);
+        console.log('giaFormatted:', /*[[${giaFormatted}]]*/ []);
+
+        // Xử lý click vào hình ảnh phụ
+        $('.thumbnail-image').click(function() {
+            const imageUrl = $(this).data('link');
+            $('#mainProductImage').attr('src', imageUrl);
+            $('.thumbnail-image').removeClass('selected');
+            $(this).addClass('selected');
+            // Cập nhật imageUrl trong form khi thay đổi hình ảnh
+            $('#selectedImageUrl').val(imageUrl);
+        });
+
+        // Đặt hình đầu tiên là selected khi trang load
+        $('.thumbnail-image').first().addClass('selected');
+        // Cập nhật imageUrl ban đầu
+        const initialImageUrl = $('#mainProductImage').attr('src');
+        $('#selectedImageUrl').val(initialImageUrl);
+
+        // Xử lý chọn màu sắc
+        $('.color-option').click(function() {
+            $('.color-option').removeClass('selected');
+            $(this).addClass('selected');
+            const maMauSac = $(this).data('mamausac');
+            $('#selectedColor').val(maMauSac);
+
+            const imageLinks = window.mauSacHinhAnhMap[maMauSac] || [];
+            if (imageLinks.length > 0) {
+                $('#mainProductImage').attr('src', imageLinks[0]);
+                $('.thumbnail-image').removeClass('selected');
+                $(`.thumbnail-image[data-link="${imageLinks[0]}"]`).addClass('selected');
+                // Cập nhật imageUrl khi chọn màu
+                $('#selectedImageUrl').val(imageLinks[0]);
+            } else {
+                $('#mainProductImage').attr('src', 'https://via.placeholder.com/300x200?text=No+Image');
+                $('.thumbnail-image').removeClass('selected');
+                $('#selectedImageUrl').val('https://via.placeholder.com/300x200?text=No+Image');
+            }
+        });
+
+        // Đặt màu đầu tiên là selected khi trang load
+        const $firstColor = $('.color-option').first();
+        if ($firstColor.length) {
+            $firstColor.addClass('selected');
+            const firstMaMauSac = $firstColor.data('mamausac');
+            $('#selectedColor').val(firstMaMauSac);
+            const firstImageLinks = window.mauSacHinhAnhMap[firstMaMauSac] || [];
+            if (firstImageLinks.length > 0) {
+                $('#mainProductImage').attr('src', firstImageLinks[0]);
+                $(`.thumbnail-image[data-link="${firstImageLinks[0]}"]`).addClass('selected');
+                $('#selectedImageUrl').val(firstImageLinks[0]); // Cập nhật imageUrl ban đầu
+            }
+        }
+
+        // Xử lý chọn dung lượng và cập nhật giá
+        $('.capacity-option').click(function() {
+            $('.capacity-option').removeClass('selected');
+            $(this).addClass('selected');
+            const maDungLuong = $(this).data('madungluong');
+            $('#selectedCapacity').val(maDungLuong);
+
+            const gia = $(this).data('gia');
+            if (gia) {
+                $('#productPrice').text(gia + ' VNĐ');
+                $('#selectedPrice').val(gia); // Cập nhật giá vào input ẩn
+            } else {
+                $('#productPrice').text('Liên hệ');
+                $('#selectedPrice').val('Liên hệ'); // Cập nhật giá "Liên hệ" nếu không có giá
+            }
+        });
+
+        // Đặt dung lượng đầu tiên là selected và cập nhật giá khi trang load
+        const $firstCapacity = $('.capacity-option').first();
+        if ($firstCapacity.length) {
+            $firstCapacity.addClass('selected');
+            const firstMaDungLuong = $firstCapacity.data('madungluong');
+            $('#selectedCapacity').val(firstMaDungLuong);
+            const firstGia = $firstCapacity.data('gia');
+            if (firstGia) {
+                $('#productPrice').text(firstGia + ' VNĐ');
+                $('#selectedPrice').val(firstGia); // Cập nhật giá ban đầu
+            } else {
+                $('#productPrice').text('Liên hệ');
+                $('#selectedPrice').val('Liên hệ'); // Cập nhật giá "Liên hệ" nếu không có giá
+            }
+        }
+
+        // Xử lý tăng/giảm số lượng
+        $('#increaseQty').click(function() {
+            let qty = parseInt($('#quantityInput').val());
+            if (qty < 10) { // Giới hạn max là 10
+                $('#quantityInput').val(qty + 1);
+            }
+        });
+        $('#decreaseQty').click(function() {
+            let qty = parseInt($('#quantityInput').val());
+            if (qty > 1) {
+                $('#quantityInput').val(qty - 1);
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
+
+<!--<script>-->
+<!--    $(document).ready(function() {-->
+<!--        // Log to verify data-->
+<!--        console.log('mauSacHinhAnhMap:', window.mauSacHinhAnhMap);-->
+<!--        console.log('giaFormatted:', /*[[${giaFormatted}]]*/ []);-->
+
+<!--        // Xử lý click vào hình ảnh phụ-->
+<!--        $('.thumbnail-image').click(function() {-->
+<!--            const imageUrl = $(this).data('link');-->
+<!--            $('#mainProductImage').attr('src', imageUrl);-->
+<!--            $('.thumbnail-image').removeClass('selected');-->
+<!--            $(this).addClass('selected');-->
+<!--        });-->
+
+<!--        // Đặt hình đầu tiên là selected khi trang load-->
+<!--        $('.thumbnail-image').first().addClass('selected');-->
+
+<!--        // Xử lý chọn màu sắc-->
+<!--        $('.color-option').click(function() {-->
+<!--            $('.color-option').removeClass('selected');-->
+<!--            $(this).addClass('selected');-->
+<!--            const maMauSac = $(this).data('mamausac');-->
+<!--            $('#selectedColor').val(maMauSac);-->
+
+<!--            const imageLinks = window.mauSacHinhAnhMap[maMauSac] || [];-->
+<!--            if (imageLinks.length > 0) {-->
+<!--                $('#mainProductImage').attr('src', imageLinks[0]);-->
+<!--                $('.thumbnail-image').removeClass('selected');-->
+<!--                $(`.thumbnail-image[data-link="${imageLinks[0]}"]`).addClass('selected');-->
+<!--            } else {-->
+<!--                $('#mainProductImage').attr('src', 'https://via.placeholder.com/300x200?text=No+Image');-->
+<!--                $('.thumbnail-image').removeClass('selected');-->
+<!--            }-->
+<!--        });-->
+
+<!--        // Đặt màu đầu tiên là selected khi trang load-->
+<!--        const $firstColor = $('.color-option').first();-->
+<!--        if ($firstColor.length) {-->
+<!--            $firstColor.addClass('selected');-->
+<!--            const firstMaMauSac = $firstColor.data('mamausac');-->
+<!--            $('#selectedColor').val(firstMaMauSac);-->
+<!--            const firstImageLinks = window.mauSacHinhAnhMap[firstMaMauSac] || [];-->
+<!--            if (firstImageLinks.length > 0) {-->
+<!--                $('#mainProductImage').attr('src', firstImageLinks[0]);-->
+<!--                $(`.thumbnail-image[data-link="${firstImageLinks[0]}"]`).addClass('selected');-->
+<!--            }-->
+<!--        }-->
+
+<!--        // Xử lý chọn dung lượng và cập nhật giá-->
+<!--        $('.capacity-option').click(function() {-->
+<!--            $('.capacity-option').removeClass('selected');-->
+<!--            $(this).addClass('selected');-->
+<!--            const maDungLuong = $(this).data('madungluong');-->
+<!--            $('#selectedCapacity').val(maDungLuong);-->
+
+<!--            const gia = $(this).data('gia');-->
+<!--            if (gia) {-->
+<!--                $('#productPrice').text(gia + ' VNĐ');-->
+<!--            } else {-->
+<!--                $('#productPrice').text('Liên hệ');-->
+<!--            }-->
+<!--        });-->
+
+<!--        // Đặt dung lượng đầu tiên là selected và cập nhật giá khi trang load-->
+<!--        const $firstCapacity = $('.capacity-option').first();-->
+<!--        if ($firstCapacity.length) {-->
+<!--            $firstCapacity.addClass('selected');-->
+<!--            const firstMaDungLuong = $firstCapacity.data('madungluong');-->
+<!--            $('#selectedCapacity').val(firstMaDungLuong);-->
+<!--            const firstGia = $firstCapacity.data('gia');-->
+<!--            if (firstGia) {-->
+<!--                $('#productPrice').text(firstGia + ' VNĐ');-->
+<!--            } else {-->
+<!--                $('#productPrice').text('Liên hệ');-->
+<!--            }-->
+<!--        }-->
+
+<!--        // Xử lý tăng/giảm số lượng-->
+<!--        $('#increaseQty').click(function() {-->
+<!--            let qty = parseInt($('#quantityInput').val());-->
+<!--            $('#quantityInput').val(qty + 1);-->
+<!--        });-->
+<!--        $('#decreaseQty').click(function() {-->
+<!--            let qty = parseInt($('#quantityInput').val());-->
+<!--            if (qty > 1) {-->
+<!--                $('#quantityInput').val(qty - 1);-->
+<!--            }-->
+<!--        });-->
+<!--    });-->
+<!--</script>-->

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chỉnh Sửa Sản Phẩm</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container { margin-top: 50px; max-width: 800px; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .btn-primary { margin-top: 20px; }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-dark">
+    <a class="navbar-brand text-white" th:href="@{/admin/index}">Trang Quản Trị</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item"><a class="nav-link text-white" th:href="@{/account/login}">Đăng Xuất</a></li>
+            <li class="nav-item"><a class="nav-link text-white" th:href="@{/admin/cart/view}">Giỏ Hàng</a></li>
+            <li class="nav-item"><a class="nav-link text-white" th:href="@{/admin/index}">Danh Sách Sản Phẩm</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <h2 class="text-center">Chỉnh Sửa Sản Phẩm</h2>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <form th:action="@{/admin/update/{id}(id=${product.masanpham})}" method="post" th:object="${product}">
+        <div class="form-group">
+            <label for="tensanpham">Tên sản phẩm:</label>
+            <input type="text" class="form-control" id="tensanpham" name="tensanpham" th:value="*{tensanpham}" required>
+        </div>
+        <div class="form-group">
+            <label for="mota">Mô tả:</label>
+            <textarea class="form-control" id="mota" name="mota" required>[[*{mota}]]</textarea>
+        </div>
+        <!-- Thêm các trường khác nếu cần, ví dụ: giá, hình ảnh, v.v. -->
+        <button type="submit" class="btn btn-primary">Cập nhật</button>
+        <a th:href="@{/admin/index}" class="btn btn-secondary">Quay lại</a>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
