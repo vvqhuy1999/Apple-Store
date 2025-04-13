@@ -49,7 +49,7 @@
         <div class="tab-pane fade" id="signup" role="tabpanel" aria-labelledby="signup-tab">
             <div class="card mt-3">
                 <div class="card-body">
-                    <form th:action="@{/account/signup}" method="post">
+                    <form id="signupForm" th:action="@{/account/signup}" method="post">
                         <div class="form-group">
                             <label for="signupFullName">Họ và tên:</label>
                             <input type="text" class="form-control" id="signupFullName" name="fullName" th:value="${signupFullName}" required>
@@ -77,6 +77,19 @@
                         <button type="submit" class="btn btn-success btn-block">Đăng Ký</button>
                     </form>
                     <h5 class="text-danger text-center mt-3" th:text="${signupMessage}"></h5> <!-- Thông báo đăng ký -->
+                    <script th:inline="javascript">
+                        /*<![CDATA[*/
+                        document.addEventListener("DOMContentLoaded", function() {
+                            var signupMessage = /*[[${signupMessage}]]*/ null;
+                            if (signupMessage) {
+                                // Sau 2 giây, chuyển đến trang đăng nhập
+                                setTimeout(function() {
+                                    window.location.href = '/account/login'; // hoặc trang bạn muốn
+                                }, 2000);
+                            }
+                        });
+                        /*]]>*/
+                    </script>
                 </div>
             </div>
         </div>
@@ -87,5 +100,46 @@
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Lấy form đăng ký bằng ID
+        const form = document.getElementById("signupForm");
+
+        // Nếu form tồn tại mới tiếp tục xử lý
+        if (form) {
+            // Lấy các trường mật khẩu
+            const passwordField = document.getElementById("signupPassword");
+            const confirmPasswordField = document.getElementById("signupConfirmPassword");
+
+            // Thêm sự kiện lắng nghe cho sự kiện submit của form
+            form.addEventListener("submit", function(event) {
+                // Kiểm tra giá trị của hai trường mật khẩu
+                if (passwordField.value !== confirmPasswordField.value) {
+                    // Ngăn chặn form không gửi
+                    event.preventDefault();
+
+                    // Kiểm tra xem thông báo lỗi đã tồn tại chưa
+                    let errorMessage = document.getElementById("passwordError");
+                    if (!errorMessage) {
+                        // Tạo phần tử thông báo lỗi mới
+                        errorMessage = document.createElement("div");
+                        errorMessage.id = "passwordError"; // đặt id cho dễ quản lý
+                        errorMessage.classList.add("text-danger", "mt-3");
+                        errorMessage.textContent = "Mật khẩu và xác nhận mật khẩu không khớp!";
+                        // Chèn thông báo lỗi vào trước nút gửi
+                        form.appendChild(errorMessage);
+                    }
+                } else {
+                    // Nếu mật khẩu khớp, xóa thông báo lỗi nếu có
+                    const existingError = document.getElementById("passwordError");
+                    if (existingError) {
+                        existingError.remove();
+                    }
+                    // Form sẽ được gửi
+                }
+            });
+        }
+    });
+</script>
 </body>
 </html>

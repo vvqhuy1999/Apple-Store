@@ -49,7 +49,7 @@ public class Accounts implements Serializable {
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "ngaytao", updatable = false)
-    private Date ngaytao;
+    private Date ngaytao ;
 
     // Relationships
     @OneToMany(mappedBy = "accounts", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

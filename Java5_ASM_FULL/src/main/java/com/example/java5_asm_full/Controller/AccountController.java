@@ -22,10 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -197,6 +194,39 @@ public class AccountController {
         return "redirect:/account/login";
     }
 
+    @PostMapping("/account/signup")
+    public String signup(Model model, RedirectAttributes redirectAttributes) {
+        // Lấy dữ liệu từ form
+        String fullname = paramService.getString("fullName", "");
+        String email = paramService.getString("email", "");
+        String password = paramService.getString("password", "");
+        String phone = paramService.getString("phone", "");
+        String address = paramService.getString("address", "");
+
+        // Kiểm tra dữ liệu
+        if (fullname.isEmpty() || email.isEmpty() || password.isEmpty()) {
+            redirectAttributes.addFlashAttribute("signupMessage", "Vui lòng điền đầy đủ thông tin");
+            return "redirect:/account/login";
+        }
+
+        // Tạo đối tượng tài khoản mới
+        Accounts account = new Accounts();
+        account.setHoten(fullname);
+        account.setEmail(email);
+        account.setMatkhau(password);
+        account.setSodienthoai(phone);
+        account.setDiachi(address);
+
+        try {
+            // Lưu tài khoản
+            accountService.save(account);
+            redirectAttributes.addFlashAttribute("signupMessage", "Đăng ký thành công");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("signupMessage", "Đăng ký thất bại: " + e.getMessage());
+        }
+
+        return "redirect:/account/login";
+    }
 
 
 }
